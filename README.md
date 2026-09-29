@@ -2,6 +2,17 @@
 
 An end-to-end data engineering pipeline that extracts e-commerce product and order data, loads it into Postgres, transforms it into a dimensional model with dbt, orchestrates the whole flow with Airflow, and serves the results through a live Streamlit dashboard — all containerized with Docker.
 
+## Screenshots
+
+**Live dashboard**
+![Dashboard](screenshots/dashboard.png)
+
+**Airflow DAG run**
+![Airflow](screenshots/airflow_grid.png)
+
+**dbt test output**
+![dbt tests](screenshots/dbt_test.png)
+
 ## Why this project
 
 Most portfolio pipelines stop at "pull an API into a database." This one goes further: it models the data into a proper star schema, tests data quality and referential integrity at every layer, and runs on a schedule against data that changes over time — closer to how a real analytics team's stack behaves than a one-off script.
