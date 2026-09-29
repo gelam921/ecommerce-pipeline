@@ -91,7 +91,7 @@ Star schema at the order-item grain — the most granular reasonable level, so e
 ## Running it
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/gelam921/ecommerce-pipeline.git
 cd ecommerce-pipeline
 cp .env.example .env
 docker compose up -d --build
