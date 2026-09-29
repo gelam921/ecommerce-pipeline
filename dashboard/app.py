@@ -20,9 +20,40 @@ def query(sql: str) -> pd.DataFrame:
     return pd.read_sql(sql, get_engine())
 
 
+def table_exists(table_name: str, schema: str = "public") -> bool:
+    result = query(f"select to_regclass('{schema}.{table_name}') is not null as exists")
+    return bool(result.iloc[0]["exists"])
+
+
 st.set_page_config(page_title="E-commerce Analytics", layout="wide")
 st.title("E-commerce Analytics")
 st.caption("Source: analytics marts built by dbt, orchestrated by Airflow")
+
+# --- Pipeline alerts, shown first since it's the most time-sensitive info ---
+st.subheader("Pipeline Alerts")
+if table_exists("pipeline_alerts"):
+    recent_count = query("""
+        select count(*) as c from public.pipeline_alerts
+        where failed_at > now() - interval '24 hours'
+    """).iloc[0]["c"]
+
+    if recent_count > 0:
+        st.error(f"{recent_count} task failure(s) in the last 24 hours")
+    else:
+        st.success("No failures in the last 24 hours")
+
+    alerts = query("""
+        select dag_id, task_id, execution_date, failed_at, log_url
+        from public.pipeline_alerts
+        order by failed_at desc
+        limit 10
+    """)
+    if not alerts.empty:
+        st.dataframe(alerts, use_container_width=True)
+else:
+    st.info("No failures recorded yet — the alerts table is created automatically the first time a task fails.")
+
+st.divider()
 
 kpis = query("""
     select
