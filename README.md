@@ -118,18 +118,18 @@ docker compose run --rm dbt test
 - **No secrets manager** — credentials are handled via `.env` / `env_var()`, appropriate for a local project; production would use something like AWS Secrets Manager or Vault.
 
 ## Project structure
-├── docker-compose.yml
-├── Dockerfile.dbt
-├── Dockerfile.airflow
-├── Dockerfile.streamlit
-├── extract/
-│ ├── extract_products.py
-│ └── generate_orders.py
-├── dbt_project/
-│ ├── models/staging/
-│ ├── models/marts/
-│ └── profiles.yml
-├── dags/
-│ └── ecommerce_pipeline_dag.py
-└── dashboard/
+├── docker-compose.yml  
+├── Dockerfile.dbt  
+├── Dockerfile.airflow  
+├── Dockerfile.streamlit  
+├── extract/  
+ │ ├── extract_products.py  
+ │ └── generate_orders.py  
+├── dbt_project/  
+│ ├── models/staging/  
+│ ├── models/marts/  
+│ └── profiles.yml  
+├── dags/  
+│ └── ecommerce_pipeline_dag.py  
+└── dashboard/  
 └── app.py
