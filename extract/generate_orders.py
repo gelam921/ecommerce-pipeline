@@ -17,8 +17,8 @@ DB_URL = (
     f"{os.getenv('POSTGRES_DB')}"
 )
 
-NUM_NEW_CUSTOMERS = 15
-NUM_NEW_ORDERS = 40
+NUM_NEW_CUSTOMERS = int(os.getenv("BULK_CUSTOMERS", 15))
+NUM_NEW_ORDERS = int(os.getenv("BULK_ORDERS", 40))
 MAX_ITEMS_PER_ORDER = 4
 
 ORDER_STATUSES = ["delivered", "shipped", "pending", "cancelled"]
