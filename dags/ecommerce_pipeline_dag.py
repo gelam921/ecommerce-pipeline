@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.bash import BashOperator
-
+import psycopg2
+import os
 
 def log_failure_alert(context):
     """Writes a row to public.pipeline_alerts when a task fails after
@@ -52,7 +53,7 @@ default_args = {
     "owner": "data-eng-portfolio",
     "retries": 0,
     "retry_delay": timedelta(minutes=5),
-    "on_failure": log_failure_alert,
+    "on_failure_callback": log_failure_alert,
 }
 
 with DAG(
