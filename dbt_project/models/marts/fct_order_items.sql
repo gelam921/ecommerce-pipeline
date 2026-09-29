@@ -1,3 +1,11 @@
+{{ config(
+    materialized='table',
+    indexes=[
+      {'columns': ['customer_id'], 'type': 'btree'},
+      {'columns': ['product_id'], 'type': 'btree'}
+    ]
+) }}
+
 with order_items as (
     select * from {{ ref('stg_order_items') }}
 ),
