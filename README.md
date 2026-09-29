@@ -126,19 +126,19 @@ Tested against a bulk-loaded ~58,000-row fact table with a customer-lookup query
 EXPLAIN ANALYZE SELECT * FROM analytics.fct_order_items WHERE customer_id = 788813;
 ```
 **Before (no index):**
-Seq Scan on fct_order_items (cost=0.00..1559.86 rows=21 width=77) (actual time=0.018..2.456 rows=9 loops=1)
-Filter: (customer_id = 788813)
-Rows Removed by Filter: 58220
-Planning Time: 0.199 ms
+Seq Scan on fct_order_items (cost=0.00..1559.86 rows=21 width=77) (actual time=0.018..2.456 rows=9 loops=1)  
+Filter: (customer_id = 788813)  
+Rows Removed by Filter: 58220  
+Planning Time: 0.199 ms  
 Execution Time: 2.477 ms
 
 **After (btree index on customer_id):**
-Bitmap Heap Scan on fct_order_items (cost=4.45..78.71 rows=21 width=77) (actual time=0.520..0.529 rows=9 loops=1)
-Recheck Cond: (customer_id = 788813)
-Heap Blocks: exact=2
--> Bitmap Index Scan on fct_order_items_customer_id_idx (cost=0.00..4.45 rows=21 width=0) (actual time=0.488..0.488 rows=9 loops=1)
-Index Cond: (customer_id = 788813)
-Planning Time: 0.815 ms
+Bitmap Heap Scan on fct_order_items (cost=4.45..78.71 rows=21 width=77) (actual time=0.520..0.529 rows=9 loops=1  
+Recheck Cond: (customer_id = 788813)  
+Heap Blocks: exact=2  
+-> Bitmap Index Scan on fct_order_items_customer_id_idx (cost=0.00..4.45 rows=21 width=0) (actual time=0.488..0.488 rows=9 loops=1)  
+Index Cond: (customer_id = 788813)  
+Planning Time: 0.815 ms  
 Execution Time: 1.724 ms
 
 The gap is modest at this scale since the table still fits in memory — a sequential scan's cost grows linearly with table size, while an index lookup's cost grows far more slowly, so the difference would be dramatically larger at production scale (millions of rows).
