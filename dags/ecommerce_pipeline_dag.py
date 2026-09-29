@@ -2,10 +2,57 @@ from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.bash import BashOperator
 
+
+def log_failure_alert(context):
+    """Writes a row to public.pipeline_alerts when a task fails after
+    exhausting retries. Self-contained — no external service required."""
+    task_instance = context.get("task_instance")
+    dag_id = context.get("dag").dag_id
+    task_id = task_instance.task_id
+    execution_date = context.get("execution_date")
+    log_url = task_instance.log_url
+
+    conn = None
+    try:
+        conn = psycopg2.connect(
+            host=os.getenv("POSTGRES_HOST", "localhost"),
+            dbname=os.getenv("POSTGRES_DB"),
+            user=os.getenv("POSTGRES_USER"),
+            password=os.getenv("POSTGRES_PASSWORD"),
+        )
+        with conn.cursor() as cur:
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS public.pipeline_alerts (
+                    id SERIAL PRIMARY KEY,
+                    dag_id TEXT NOT NULL,
+                    task_id TEXT NOT NULL,
+                    execution_date TIMESTAMPTZ,
+                    log_url TEXT,
+                    failed_at TIMESTAMPTZ DEFAULT now()
+                )
+            """)
+            cur.execute(
+                """
+                INSERT INTO public.pipeline_alerts
+                    (dag_id, task_id, execution_date, log_url)
+                VALUES (%s, %s, %s, %s)
+                """,
+                (dag_id, task_id, execution_date, log_url),
+            )
+        conn.commit()
+    except Exception as e:
+        # A logging failure shouldn't cascade into a second error on top
+        # of the original task failure — print and move on.
+        print(f"Failed to log alert: {e}")
+    finally:
+        if conn:
+            conn.close()
+
 default_args = {
     "owner": "data-eng-portfolio",
-    "retries": 2,
+    "retries": 0,
     "retry_delay": timedelta(minutes=5),
+    "on_failure": log_failure_alert,
 }
 
 with DAG(
